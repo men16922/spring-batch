@@ -12,9 +12,20 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
+/**
+ * packageName    : io.springbatch.springbatch
+ * fileName       : JobInstanceConfiguration
+ * author         : men16
+ * date           : 2022-09-24
+ * description    :
+ * ===========================================================
+ * DATE              AUTHOR             NOTE
+ * -----------------------------------------------------------
+ * 2022-09-24        men16       최초 생성
+ */
 @RequiredArgsConstructor
-public class JobConfiguration {
+@Configuration
+public class JobInstanceConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
@@ -51,3 +62,4 @@ public class JobConfiguration {
                 .build();
     }
 }
+
