@@ -12,20 +12,9 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * packageName    : io.springbatch.springbatch
- * fileName       : JobInstanceConfiguration
- * author         : men16
- * date           : 2022-09-24
- * description    :
- * ===========================================================
- * DATE              AUTHOR             NOTE
- * -----------------------------------------------------------
- * 2022-09-24        men16       최초 생성
- */
 @RequiredArgsConstructor
 @Configuration
-public class JobInstanceConfiguration {
+public class StepContributionConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
@@ -38,28 +27,26 @@ public class JobInstanceConfiguration {
                 .build();
     }
 
-    private Step step1() {
+    public Step step1() {
         return stepBuilderFactory.get("step1")
                 .tasklet(new Tasklet() {
                     @Override
-                    public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
-                        System.out.println("step1 was executed");
+                    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+                        System.out.println("step2 has executed");
                         return RepeatStatus.FINISHED;
                     }
                 })
                 .build();
     }
 
-    private Step step2() {
+    public Step step2() {
         return stepBuilderFactory.get("step2")
-                .tasklet(new Tasklet() {
-                    @Override
-                    public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
-                        System.out.println("step2 was executed");
-                        return RepeatStatus.FINISHED;
-                    }
+                .tasklet((contribution, chunkContext) -> {
+                    System.out.println("step2 has executed");
+                    return RepeatStatus.FINISHED;
                 })
                 .build();
     }
+
 }
 
