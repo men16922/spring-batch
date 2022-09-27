@@ -15,19 +15,16 @@ import org.springframework.context.annotation.Configuration;
 
 @RequiredArgsConstructor
 @Configuration
-public class JobRepositoryConfiguration {
+public class JobLauncherConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
 
-    private final JobExecutionListener jobRepositoryListener;
-
     @Bean
     public Job job() {
-        return jobBuilderFactory.get("job")
+        return jobBuilderFactory.get("Job")
                 .start(step1())
                 .next(step2())
-                .listener(jobRepositoryListener)
                 .build();
     }
 
@@ -37,6 +34,7 @@ public class JobRepositoryConfiguration {
                 .tasklet(new Tasklet() {
                     @Override
                     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+                        Thread.sleep(3000);
                         return RepeatStatus.FINISHED;
                     }
                 })
