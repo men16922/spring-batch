@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 
 @RequiredArgsConstructor
 @Configuration
-public class PreventRestartConfiguration {
+public class IncrementerConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
@@ -24,7 +24,7 @@ public class PreventRestartConfiguration {
         return jobBuilderFactory.get("batchJob1")
                 .start(step1())
                 .next(step2())
-                .preventRestart()
+                .incrementer(new CustomJobParametersIncrementer())
                 .build();
     }
 
