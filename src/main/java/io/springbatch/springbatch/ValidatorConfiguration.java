@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.job.DefaultJobParametersValidator;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 
 @RequiredArgsConstructor
 @Configuration
-public class StartNextConfiguration {
+public class ValidatorConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
@@ -24,6 +24,8 @@ public class StartNextConfiguration {
                 .start(step1())
                 .next(step2())
                 .next(step3())
+//                .validator(new CustomJobParametersValidator())
+                .validator(new DefaultJobParametersValidator(new String[]{"name","date"}, new String[]{"count"}))
                 .build();
     }
 
