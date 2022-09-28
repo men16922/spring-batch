@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 
 @RequiredArgsConstructor
 @Configuration
-public class SimpleJobConfiguration {
+public class StartNextConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
@@ -24,25 +24,6 @@ public class SimpleJobConfiguration {
                 .start(step1())
                 .next(step2())
                 .next(step3())
-                .incrementer(new RunIdIncrementer())
-                .validator(new JobParametersValidator() {
-                    @Override
-                    public void validate(JobParameters parameters) throws JobParametersInvalidException {
-
-                    }
-                })
-                .preventRestart()
-                .listener(new JobExecutionListener() {
-                    @Override
-                    public void beforeJob(JobExecution jobExecution) {
-
-                    }
-
-                    @Override
-                    public void afterJob(JobExecution jobExecution) {
-
-                    }
-                })
                 .build();
     }
 
@@ -75,8 +56,6 @@ public class SimpleJobConfiguration {
     public Step step3() {
         return stepBuilderFactory.get("step3")
                 .tasklet((contribution, chunkContext) -> {
-                    chunkContext.getStepContext().getStepExecution().setStatus(BatchStatus.FAILED);
-                    contribution.setExitStatus(ExitStatus.STOPPED);
                     System.out.println("step3 was executed");
                     return RepeatStatus.FINISHED;
                 })
