@@ -28,5 +28,7 @@ spring:
   batch:
     jdbc:
       initialize-schema: always
+#      table-prefix: SYSTEM_
     job:
+      names: ${job.name:NONE}
       enables: true
