@@ -6,21 +6,16 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.Arrays;
-import java.util.List;
-
 @RequiredArgsConstructor
 @Configuration
-public class TaskletStepConfiguration {
+public class TaskletConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
@@ -28,18 +23,20 @@ public class TaskletStepConfiguration {
     @Bean
     public Job batchJob() {
         return jobBuilderFactory.get("batchJob")
-                .start(chunkStep())
+                .incrementer(new RunIdIncrementer())
+                .start(step1())
+                .next(step2())
                 .build();
     }
 
 
     @Bean
-    public Step taskStep() {
-        return stepBuilderFactory.get("taskStep")
+    public Step step1() {
+        return stepBuilderFactory.get("step1")
                 .tasklet(new Tasklet() {
                     @Override
                     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-                        System.out.println("step was executed");
+                        System.out.println("step1 was executed");
                         return RepeatStatus.FINISHED;
                     }
                 })
@@ -47,24 +44,12 @@ public class TaskletStepConfiguration {
     }
 
     @Bean
-    public Step chunkStep() {
-        return stepBuilderFactory.get("chunkStep")
-                .<String, String>chunk(10)
-                .reader(new ListItemReader<>(Arrays.asList("item1","item2","item3","item4","item5")))
-                .processor(new ItemProcessor<String, String>() {
-                    @Override
-                    public String process(String item) throws Exception {
-                        return item.toUpperCase();
-                    }
-                })
-                .writer(new ItemWriter<String>() {
-                    @Override
-                    public void write(List<? extends String> items) throws Exception {
-                        items.forEach(item -> System.out.println(item));
-                    }
-                })
+    public Step step2() {
+        return stepBuilderFactory.get("step2")
+                .tasklet(new CustomTasklet())
                 .build();
     }
+
 
 }
 
