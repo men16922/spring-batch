@@ -1,11 +1,10 @@
 package io.springbatch.springbatch;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
-import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -14,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 
 @RequiredArgsConstructor
 @Configuration
-public class Limit_AllowConfiguration {
+public class TaskletStepArchitectureConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
@@ -22,8 +21,20 @@ public class Limit_AllowConfiguration {
     @Bean
     public Job batchJob() {
         return jobBuilderFactory.get("batchJob")
+                .incrementer(new RunIdIncrementer())
                 .start(step1())
                 .next(step2())
+                .listener(new StepExecutionListener() {
+                    @Override
+                    public void beforeStep(StepExecution stepExecution) {
+
+                    }
+
+                    @Override
+                    public ExitStatus afterStep(StepExecution stepExecution) {
+                        return null;
+                    }
+                })
                 .build();
     }
 
@@ -38,7 +49,6 @@ public class Limit_AllowConfiguration {
                         return RepeatStatus.FINISHED;
                     }
                 })
-                .allowStartIfComplete(true)
                 .build();
     }
 
@@ -49,11 +59,9 @@ public class Limit_AllowConfiguration {
                     @Override
                     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
                         System.out.println("stepContribution = " + contribution + ", chunkContext = " + chunkContext);
-                        throw new RuntimeException("step2 was failed");
-//                        return RepeatStatus.FINISHED;
+                        return RepeatStatus.FINISHED;
                     }
                 })
-                .startLimit(3)
                 .build();
     }
 
