@@ -24,8 +24,8 @@ public class JobScope_StepScope_Configuration {
     public Job job() {
         return jobBuilderFactory.get("batchJob")
                 .start(step1(null))
-                .next(step2())
-                .listener(new CustomJobListener())
+//                .next(step2())
+//                .listener(new CustomJobListener())
                 .build();
     }
 
@@ -38,13 +38,13 @@ public class JobScope_StepScope_Configuration {
                 .build();
     }
 
-    @Bean
-    public Step step2() {
-        return stepBuilderFactory.get("step2")
-                .tasklet(tasklet2(null))
-                .listener(new CustomStepListener())
-                .build();
-    }
+//    @Bean
+//    public Step step2() {
+//        return stepBuilderFactory.get("step2")
+//                .tasklet(tasklet2(null))
+//                .listener(new CustomStepListener())
+//                .build();
+//    }
 
     @Bean
     @StepScope
