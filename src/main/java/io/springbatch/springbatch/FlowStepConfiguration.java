@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 
 @RequiredArgsConstructor
 @Configuration
-public class SimpleFlowConfiguration {
+public class FlowStepConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
@@ -21,27 +21,26 @@ public class SimpleFlowConfiguration {
     @Bean
     public Job job() {
         return jobBuilderFactory.get("batchJob")
-                .start(step1())
-                    .on("COMPLETED")
-                    .to(step2())
-                .from(step1())
-                    .on("FAILED")
-                    .to(flow())
-                .end()
+                .start(flowStep())
+                .next(step2())
                 .build();
     }
 
-    @Bean
-    public Flow flow() {
-        FlowBuilder<Flow> flowBuilder = new FlowBuilder<>("flow1");
+    private Step flowStep() {
+        return stepBuilderFactory.get("flowStep")
+                .flow(flow())
+                .build();
 
-        flowBuilder.start(step2())
-                .on("*")
-                .to(step3())
+    }
+
+    private Flow flow() {
+
+        FlowBuilder<Flow> flowBuilder = new FlowBuilder<>("flow");
+
+        flowBuilder.start(step1())
                 .end();
 
         return flowBuilder.build();
-
     }
 
     @Bean
@@ -49,7 +48,8 @@ public class SimpleFlowConfiguration {
         return stepBuilderFactory.get("step1")
                 .tasklet((contribution, chunkContext) -> {
                     System.out.println(">>step1 has executed");
-                    return RepeatStatus.FINISHED;
+                    throw new RuntimeException("step1 was failed");
+//                    return RepeatStatus.FINISHED;
                 }).build();
     }
 
