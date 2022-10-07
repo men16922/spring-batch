@@ -5,9 +5,10 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
+import org.springframework.batch.item.adapter.ItemReaderAdapter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,7 +16,7 @@ import javax.sql.DataSource;
 
 @RequiredArgsConstructor
 @Configuration
-public class JdbcCursorConfiguration {
+public class ItemReaderAdapterConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
@@ -25,6 +26,7 @@ public class JdbcCursorConfiguration {
     @Bean
     public Job job() {
         return jobBuilderFactory.get("batchJob")
+                .incrementer(new RunIdIncrementer())
                 .start(step1())
                 .build();
     }
@@ -32,34 +34,32 @@ public class JdbcCursorConfiguration {
     @Bean
     public Step step1() {
         return stepBuilderFactory.get("step1")
-                .<Customer, Customer>chunk(chunkSize)
+                .<String, String>chunk(chunkSize)
                 .reader(customItemReader())
                 .writer(customItemWriter())
                 .build();
     }
 
     @Bean
-    public ItemReader<Customer> customItemReader() {
+    public ItemReader<String> customItemReader() {
+        ItemReaderAdapter<String> reader = new ItemReaderAdapter<>();
+        reader.setTargetObject(customService());
+        reader.setTargetMethod("customRead");
 
-        return new JdbcCursorItemReaderBuilder<Customer>()
-                .name("jdbcCursorItemReader")
-                .fetchSize(chunkSize)
-                .sql("select id, firstName, lastName, birthdate from customer where firstName like ? order by lastName, firstName")
-                .beanRowMapper(Customer.class)
-                .queryArguments("A%")
-                .dataSource(dataSource)
-                .build();
+        return reader;
     }
 
     @Bean
-    public ItemWriter<Customer> customItemWriter() {
-        return items -> {
-            for (Customer customer : items) {
-                System.out.println(customer.toString());
-            }
-        };
+    public Object customService() {
+        return new CustomService();
     }
 
+    @Bean
+    public ItemWriter<String> customItemWriter() {
+        return items -> {
+            System.out.println(items);
+        };
+    }
 
 }
 
