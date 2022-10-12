@@ -7,13 +7,16 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.*;
-import org.springframework.batch.item.adapter.ItemWriterAdapter;
+import org.springframework.batch.item.support.builder.CompositeItemProcessorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RequiredArgsConstructor
 @Configuration
-public class ItemWriterAdapterConfiguration {
+public class CompositeItemConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
@@ -38,26 +41,27 @@ public class ItemWriterAdapterConfiguration {
                     public String read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
                         i++;
                         
-                        return i > 10 ? null : "item" + i;
+                        return i > 10 ? null : "item";
                     }
                 })
-                .writer(customItemWriter())
+                .processor(customItemProcessor())
+                .writer(items -> System.out.println(items))
                 .build();
     }
 
-    private ItemWriter<String> customItemWriter() {
-
-        ItemWriterAdapter<String> writer = new ItemWriterAdapter<>();
-        writer.setTargetObject(customService());
-        writer.setTargetMethod("customWrite");
-
-        return writer;
-    }
-
     @Bean
-    public CustomService customService() {
-        return new CustomService();
+    public ItemProcessor<? super String, String> customItemProcessor() {
+
+        List itemProcessor = new ArrayList();
+        itemProcessor.add(new CustomItemProcessor());
+        itemProcessor.add(new CustomItemProcessor2());
+
+        return new CompositeItemProcessorBuilder<>()
+                .delegates(itemProcessor)
+                .build();
+
     }
+
 
 }
 
