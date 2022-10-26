@@ -1,5 +1,6 @@
-package io.springbatch;
+package io.springbatch.api;
 
+import io.springbatch.RetryableException;
 import org.springframework.batch.item.ItemProcessor;
 
 public class RetryItemProcessor implements ItemProcessor<String, String> {

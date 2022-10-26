@@ -1,5 +1,6 @@
-package io.springbatch;
+package io.springbatch.api;
 
+import io.springbatch.RetryableException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
-@Configuration
+//@Configuration
 public class RetryConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
@@ -28,7 +29,7 @@ public class RetryConfiguration {
 
     @Bean
     public Job job() {
-        return jobBuilderFactory.get("batchJob")
+        return jobBuilderFactory.get("batchJob1")
                 .incrementer(new RunIdIncrementer())
                 .start(step1())
                 .build();
